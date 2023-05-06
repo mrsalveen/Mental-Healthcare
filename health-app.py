@@ -66,23 +66,13 @@ import os
 
 openai.api_key = os.getenv('OPENAI_API_KEY')
 
-prompt = "I am a mental health assistant. I ask you questions based on your problems \
+prompt0 = "You are a mental health assistant. I ask you questions based on problems \
          that will lead us to understanding the real root of the problem."
 
-def generate_response(prompt, conversation_history):
-    # Combine prompt and conversation history
-    prompt_with_history = f"{prompt}\n\n" + "\n\n".join(conversation_history[-20:])
-
-    # Generate response from OpenAI API
-    completion = openai.Completion.create(
-        engine='text-davinci-002',
-        prompt=prompt_with_history,
-        max_tokens=1024,
-        n=1,
-        stop=None,
-        temperature=0.4,
-    )
-    message = completion.choices[0].text.strip()
+def generate_response():
+    messages = [{'role': 'assistant' if message.startswith("AI:") else 'user', 'content':message[3:] if message.startswith("AI:") else message} for message in st.session_state['history']]
+    completion = openai.ChatCompletion.create(model = "gpt-4",messages =  messages )
+    message = completion["choices"][0]["message"]['content']
     return message
 
 st.title("Healthcare App")
@@ -99,16 +89,16 @@ if 'generated' not in st.session_state:
 if 'past' not in st.session_state:
     st.session_state['past'] = []
 if 'history' not in st.session_state:
-    st.session_state['history'] = []
+    st.session_state['history'] = [prompt0]
 
 user_input = st.text_input("You:", key='input_text_by_user')
 
 if user_input:
-    output = generate_response(prompt, st.session_state['history'] + [f"User: {user_input}"])
+    st.session_state['history'].append(user_input)
+    output = generate_response()
     st.session_state['past'].append(user_input)
     st.session_state['generated'].append(output)
-    st.session_state['history'].append(f"User: {user_input}")
-    st.session_state['history'].append(f"AI: {output}")
+    st.session_state['history'].append(f"AI:{output}")
 
 if st.session_state['generated']:
     for i in range(len(st.session_state['generated'])-1, -1, -1):
