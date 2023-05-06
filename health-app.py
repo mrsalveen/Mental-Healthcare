@@ -29,11 +29,6 @@ def generate_response(prompt, conversation_history):
 
 st.title("Healthcare App")
 
-st.sidebar.write("Press to get your mental state")
-if st.sidebar.button('Evaluate'):
-    st.sidebar.write("Below you will see your evaluation evaluation...")
-    # output = generate_response(prompt, st.session_state['history'])
-    # st.sidebar.write(output)
 
 # Storing the chat
 if 'generated' not in st.session_state:
@@ -45,12 +40,19 @@ if 'history' not in st.session_state:
 
 user_input = st.text_input("You:", key='input_text_by_user')
 
-if user_input:
-    output = generate_response(prompt, st.session_state['history'] + [f"User: {user_input}"])
-    st.session_state['past'].append(user_input)
-    st.session_state['generated'].append(output)
-    st.session_state['history'].append(f"User: {user_input}")
-    st.session_state['history'].append(f"AI: {output}")
+st.sidebar.write("Press to get your mental state")
+if st.sidebar.button('Evaluate'):
+    st.sidebar.write("Below you will see your evaluation evaluation...")
+    output = generate_response(prompt, st.session_state['history'] + [f"Patient: Based on our \
+        chat history give me an evaluation of my mental health state."])
+    st.sidebar.write(output)
+else:
+    if user_input:
+        output = generate_response(prompt, st.session_state['history'] + [f"Patient: {user_input}"])
+        st.session_state['past'].append(user_input)
+        st.session_state['generated'].append(output)
+        st.session_state['history'].append(f"Patient: {user_input}")
+        st.session_state['history'].append(f"Assistant: {output}")
 
 if st.session_state['generated']:
     for i in range(len(st.session_state['generated'])-1, -1, -1):
