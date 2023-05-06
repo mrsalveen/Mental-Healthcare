@@ -2,18 +2,28 @@ import openai
 import streamlit as st
 from streamlit_chat import message
 import os
+
 # converstation dataset https://github.com/thu-coai/Emotional-Support-Conversation
 # depression chatbot https://www.kaggle.com/datasets/nupurgopali/depression-data-for-chatbot
+
 openai.api_key = os.getenv('OPENAI_API_KEY')
 
-def generate_response(prompt):
+prompt = "I am a mental halth assistant. I ask you questions based on your problems \
+         that will lead us to understanding the real root of the problem."
+
+def generate_response(prompt, user_input):
+    
+    # Combine prompt and user input
+    prompt_with_user_input = f"{prompt}\n\nUser: {user_input}"
+    
+    # Generate response from OpenAI API
     completion = openai.Completion.create(
-        engine='text-davinci-003',
-        prompt=prompt,
+        engine='text-davinci-002',
+        prompt=prompt_with_user_input,
         max_tokens=1024,
         n=1,
         stop=None,
-        temperature=0.8,
+        temperature=0.7,
     )
     message = completion.choices[0].text.strip()
     return message
@@ -25,14 +35,19 @@ if 'generated' not in st.session_state:
     st.session_state['generated'] = []
 if 'past' not in st.session_state:
     st.session_state['past'] = []
+    
+user_input = st.text_input("You:", key='input_text_by_user')
 
-user_input = st.text_input("You:", key='input')
-
-if user_input:
-    output = generate_response(user_input)
-    #store the output
-    st.session_state['past'].append(user_input)
-    st.session_state['generated'].append(output)
+if st.sidebar.button('Evaluation'):
+    st.sidebar.write("Below you will see your evaluation evaluation")
+    output = generate_response(prompt, "Please give me an approximate diagnosis based on everything \
+        I have told you before.")
+    st.sidebar.write(output)
+else:   
+    if user_input:
+        output = generate_response(prompt, user_input)
+        st.session_state['past'].append(user_input)
+        st.session_state['generated'].append(output)
 
 if st.session_state['generated']:
     for i in range(len(st.session_state['generated'])-1, -1, -1):
