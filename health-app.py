@@ -1,8 +1,10 @@
 import openai
 import streamlit as st
 from streamlit_chat import message
-
-openai.api_key = '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'
+import os
+# converstation dataset https://github.com/thu-coai/Emotional-Support-Conversation
+# depression chatbot https://www.kaggle.com/datasets/nupurgopali/depression-data-for-chatbot
+openai.api_key = os.getenv('OPENAI_API_KEY')
 
 def generate_response(prompt):
     completion = openai.Completion.create(
