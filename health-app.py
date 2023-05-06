@@ -33,8 +33,10 @@ user_input = st.text_input("You:", key='input_text_by_user')
 st.sidebar.write("Press to get your mental state")
 if st.sidebar.button('Evaluate'):
     st.sidebar.write("Below you will see your evaluation evaluation...")
-    output = generate_response(prompt, st.session_state['history'] + [f"Patient: Based on our \
-        chat history give me an evaluation of my mental health state."])
+    st.session_state['history'].append(f"Patient: Based on our \
+        chat history give me an evaluation of my mental health state.")
+    output = generate_response()
+    st.session_state['history'] = st.session_state['history'][:-1]
     st.sidebar.write(output)
 else:
     if user_input:
